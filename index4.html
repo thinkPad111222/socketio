@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>index4</h1>
+
+    <p id="form">
+      <input type="text" id="name" placeholder="enter name" />
+      <button onclick="sendName()">send</button>
+    </p>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.2/socket.io.js"
+      integrity="sha512-VJ6+sp2E5rFQk05caiXXzQd1wBABpjEj1r5kMiLmGAAgwPItw1YpqsCCBtq8Yr1x6C49/mTpRdXtq8O2RcZhlQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+
+    <script>
+      const socket = io();
+      function sendName() {
+        var name = document.getElementById("name").value;
+        var form = document.getElementById("form");
+
+        if (!name) {
+          alert("please enter name");
+        } else {
+          socket.emit("setUserName", name);
+          document.getElementById("name").value = "";
+        }
+      }
+      var user = "";
+      socket.on("setUser", (data) => {
+        if (data) {
+          user = data.name;
+          form.innerHTML = ``;
+          form.innerHTML = `
+          <input type="text" id="message" placeholder="enter message" />
+      <button onclick="sendMessage()">message send</button>
+      <div id="container"></div>
+          `;
+        }
+      });
+
+      socket.on("existsUser", (message) => {
+        alert(message);
+      });
+
+      function sendMessage() {
+        var message = document.getElementById("message").value;
+        if (!message) {
+          alert("please enter your message first");
+        } else {
+          socket.emit("sendMessage", { message, user });
+          document.getElementById("message").value = "";
+        }
+      }
+
+      socket.on("newMsg", (data) => {
+        let style = "color :green;margin-top:1px; margin-left:0px; ";
+        if (data.user !== user) {
+          style = "color :red;margin-top:1px; margin-left:100px; ";
+        }
+        document.getElementById("container").innerHTML += `<p style="${style}">
+        ${data.user}:  ${data.message}
+          </p> <br>`;
+      });
+    </script>
+  </body>
+</html>
